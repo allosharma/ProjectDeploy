@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pawfound — Find Your Forever Friend</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f7f3ee;
+    --bark: #2b1f14;
+    --warm: #c4875a;
+    --muted: #9a8a7a;
+    --line: rgba(43,31,20,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--bark);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.6rem 4rem;
+    background: var(--cream);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    color: var(--bark);
+  }
+
+  .logo span { color: var(--warm); }
+
+  nav ul {
+    display: flex; gap: 2.5rem; list-style: none;
+  }
+
+  nav a {
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--bark); }
+
+  .nav-cta {
+    background: var(--bark) !important;
+    color: var(--cream) !important;
+    padding: 0.55rem 1.4rem;
+    border-radius: 2px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-top: 80px;
+  }
+
+  .hero-text {
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6rem 4rem 6rem 4rem;
+    opacity: 0; transform: translateY(28px);
+    animation: rise 0.9s cubic-bezier(.22,1,.36,1) 0.2s forwards;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--warm);
+    margin-bottom: 1.8rem;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 5vw, 4.8rem);
+    font-weight: 300;
+    line-height: 1.08;
+    margin-bottom: 1.6rem;
+  }
+
+  h1 em { font-style: italic; color: var(--warm); }
+
+  .hero-sub {
+    font-size: 1rem;
+    color: var(--muted);
+    line-height: 1.75;
+    max-width: 38ch;
+    margin-bottom: 3rem;
+  }
+
+  .btn-group { display: flex; gap: 1rem; align-items: center; }
+
+  .btn-primary {
+    background: var(--bark);
+    color: var(--cream);
+    text-decoration: none;
+    padding: 0.85rem 2.2rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-primary:hover { background: var(--warm); transform: translateY(-1px); }
+
+  .btn-ghost {
+    text-decoration: none;
+    color: var(--bark);
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--bark);
+    padding-bottom: 2px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--warm); border-color: var(--warm); }
+
+  .hero-visual {
+    position: relative; overflow: hidden;
+    opacity: 0; animation: rise 1s cubic-bezier(.22,1,.36,1) 0.4s forwards;
+  }
+
+  .hero-visual img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: sepia(8%) contrast(1.04);
+  }
+
+  .hero-tag {
+    position: absolute; bottom: 2.5rem; left: 2rem;
+    background: var(--cream);
+    padding: 0.9rem 1.3rem;
+    border-radius: 3px;
+    display: flex; align-items: center; gap: 0.8rem;
+    box-shadow: 0 4px 24px rgba(43,31,20,0.1);
+  }
+
+  .hero-tag .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #6abf6a;
+    animation: pulse 2s infinite;
+  }
+
+  .hero-tag p { font-size: 0.8rem; color: var(--muted); }
+  .hero-tag strong { display: block; font-size: 0.9rem; color: var(--bark); font-weight: 400; }
+
+  /* ── STATS ── */
+  .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stat {
+    padding: 2.8rem 4rem;
+    border-right: 1px solid var(--line);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .stat:last-child { border-right: none; }
+  .stat.visible { opacity: 1; transform: none; }
+
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--bark);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-num span { color: var(--warm); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.08em; }
+
+  /* ── PETS ── */
+  .section { padding: 7rem 4rem; }
+
+  .section-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 4rem;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .section-header.visible { opacity: 1; transform: none; }
+
+  .section-label {
+    font-size: 0.72rem; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--warm);
+    margin-bottom: 0.8rem;
+  }
+
+  h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 300;
+    line-height: 1.2;
+  }
+
+  .see-all {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.8rem; letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 2px;
+    transition: color 0.2s;
+  }
+
+  .see-all:hover { color: var(--bark); }
+
+  /* Filter tabs */
+  .filters {
+    display: flex; gap: 0.6rem; margin-bottom: 3rem;
+    opacity: 0; transition: opacity 0.6s 0.1s;
+  }
+
+  .filters.visible { opacity: 1; }
+
+  .filter-btn {
+    background: none; border: 1px solid var(--line);
+    padding: 0.45rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+    border-radius: 2px; cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--bark); color: var(--cream); border-color: var(--bark);
+  }
+
+  /* Pet grid */
+  .pets-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+  }
+
+  .pet-card {
+    cursor: pointer; overflow: hidden;
+    border: 1px solid var(--line); border-radius: 3px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    opacity: 0; transform: translateY(24px);
+  }
+
+  .pet-card.visible {
+    opacity: 1; transform: none;
+  }
+
+  .pet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(43,31,20,0.1);
+  }
+
+  .pet-img {
+    aspect-ratio: 4/3; overflow: hidden; position: relative;
+  }
+
+  .pet-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(.22,1,.36,1);
+    filter: sepia(6%) contrast(1.02);
+  }
+
+  .pet-card:hover .pet-img img { transform: scale(1.05); }
+
+  .pet-badge {
+    position: absolute; top: 1rem; right: 1rem;
+    background: var(--cream); color: var(--warm);
+    font-size: 0.68rem; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 0.3rem 0.7rem;
+    border-radius: 2px;
+  }
+
+  .pet-info { padding: 1.4rem; }
+
+  .pet-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem; font-weight: 400;
+    margin-bottom: 0.3rem;
+  }
+
+  .pet-meta {
+    font-size: 0.78rem; color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .pet-traits {
+    display: flex; gap: 0.5rem; flex-wrap: wrap;
+  }
+
+  .trait {
+    font-size: 0.7rem; letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    padding: 0.2rem 0.6rem; border-radius: 2px;
+    color: var(--muted);
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    background: var(--bark); color: var(--cream);
+    padding: 7rem 4rem;
+  }
+
+  .how .section-label { color: var(--warm); }
+  .how h2 { color: var(--cream); margin-bottom: 4rem; }
+  .how .section-header { border-bottom: 1px solid rgba(247,243,238,0.1); padding-bottom: 3rem; margin-bottom: 4rem; }
+
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .step {
+    padding: 2rem 3rem 2rem 0;
+    border-right: 1px solid rgba(247,243,238,0.1);
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .step:last-child { border-right: none; padding-right: 0; padding-left: 3rem; }
+  .step:nth-child(2) { padding-left: 3rem; }
+  .step.visible { opacity: 1; transform: none; }
+
+  .step-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem; font-weight: 300;
+    color: rgba(196,135,90,0.3); line-height: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .step h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 300;
+    margin-bottom: 0.8rem; color: var(--cream);
+  }
+
+  .step p { font-size: 0.88rem; color: rgba(247,243,238,0.55); line-height: 1.8; }
+
+  /* ── TESTIMONIAL ── */
+  .testimonial-section {
+    padding: 7rem 4rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .testimonials {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem;
+    margin-top: 4rem;
+  }
+
+  .testi {
+    padding: 2.5rem;
+    border: 1px solid var(--line); border-radius: 3px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.6s, transform 0.6s;
+  }
+
+  .testi.visible { opacity: 1; transform: none; }
+
+  .testi-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem; font-style: italic;
+    font-weight: 300; line-height: 1.7;
+    margin-bottom: 1.5rem; color: var(--bark);
+  }
+
+  .testi-author { display: flex; align-items: center; gap: 0.9rem; }
+
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    object-fit: cover; filter: sepia(10%);
+  }
+
+  .testi-name { font-size: 0.85rem; font-weight: 400; }
+  .testi-sub { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── CTA ── */
+  .cta-section {
+    padding: 8rem 4rem;
+    text-align: center;
+  }
+
+  .cta-section h2 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    margin-bottom: 1.2rem;
+  }
+
+  .cta-section p {
+    font-size: 1rem; color: var(--muted);
+    max-width: 40ch; margin: 0 auto 3rem;
+    line-height: 1.8;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+
+  footer p { font-size: 0.78rem; color: var(--muted); }
+
+  footer ul {
+    display: flex; gap: 2rem; list-style: none;
+  }
+
+  footer a {
+    font-size: 0.78rem; color: var(--muted);
+    text-decoration: none; transition: color 0.2s;
+  }
+
+  footer a:hover { color: var(--bark); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes rise {
+    to { opacity: 1; transform: none; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    nav ul { display: none; }
+    .hero { grid-template-columns: 1fr; min-height: auto; }
+    .hero-visual { height: 55vw; }
+    .hero-text { padding: 4rem 2rem; }
+    .stats { grid-template-columns: 1fr; }
+    .stat { border-right: none; border-bottom: 1px solid var(--line); padding: 2rem; }
+    .section { padding: 4rem 2rem; }
+    .pets-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .step, .step:nth-child(2), .step:last-child { padding: 2rem 0; border-right: none; border-bottom: 1px solid rgba(247,243,238,0.1); }
+    .how { padding: 4rem 2rem; }
+    .testimonials { grid-template-columns: 1fr; }
+    .testimonial-section { padding: 4rem 2rem; }
+    .cta-section { padding: 5rem 2rem; }
+    footer { flex-direction: column; gap: 1.2rem; padding: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Paw<span>found</span></a>
+  <ul>
+    <li><a href="#pets">Find a Pet</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#stories">Stories</a></li>
+    <li><a href="#pets" class="nav-cta">Adopt Now</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="eyebrow">Open adoptions near you</p>
+    <h1>Every pet deserves a <em>forever</em> home.</h1>
+    <p class="hero-sub">We connect rescue animals with families who care. Simple process, real connections, lifelong bonds.</p>
+    <div class="btn-group">
+      <a href="#pets" class="btn-primary">Browse Animals</a>
+      <a href="#how" class="btn-ghost">Learn More</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <img src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=900&q=80" alt="Golden dog looking up warmly">
+    <div class="hero-tag">
+      <div class="dot"></div>
+      <div>
+        <strong>48 pets available</strong>
+        <p>Updated today</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat observe">
+    <div class="stat-num">4,200<span>+</span></div>
+    <div class="stat-label">Happy adoptions</div>
+  </div>
+  <div class="stat observe">
+    <div class="stat-num">98<span>%</span></div>
+    <div class="stat-label">Satisfaction rate</div>
+  </div>
+  <div class="stat observe">
+    <div class="stat-num">120<span>+</span></div>
+    <div class="stat-label">Partner shelters</div>
+  </div>
+</div>
+
+<!-- PETS -->
+<section class="section" id="pets">
+  <div class="section-header observe">
+    <div>
+      <p class="section-label">Available now</p>
+      <h2>Meet your new<br>companion</h2>
+    </div>
+    <a href="#" class="see-all">See all →</a>
+  </div>
+
+  <div class="filters observe" id="filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="dog">Dogs</button>
+    <button class="filter-btn" data-filter="cat">Cats</button>
+    <button class="filter-btn" data-filter="other">Others</button>
+  </div>
+
+  <div class="pets-grid" id="petsGrid">
+
+    <div class="pet-card observe" data-type="dog">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1552053831-71594a27632d?w=600&q=80" alt="Golden Retriever">
+        <span class="pet-badge">New</span>
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Biscuit</div>
+        <div class="pet-meta">Golden Retriever · 2 yrs · Male</div>
+        <div class="pet-traits">
+          <span class="trait">Playful</span>
+          <span class="trait">Kid-friendly</span>
+          <span class="trait">Trained</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-card observe" data-type="cat">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&q=80" alt="Tabby cat">
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Mochi</div>
+        <div class="pet-meta">Tabby Cat · 3 yrs · Female</div>
+        <div class="pet-traits">
+          <span class="trait">Calm</span>
+          <span class="trait">Indoor</span>
+          <span class="trait">Gentle</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-card observe" data-type="dog">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?w=600&q=80" alt="Poodle">
+        <span class="pet-badge">Urgent</span>
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Pepper</div>
+        <div class="pet-meta">Miniature Poodle · 4 yrs · Female</div>
+        <div class="pet-traits">
+          <span class="trait">Hypoallergenic</span>
+          <span class="trait">Smart</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-card observe" data-type="cat">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1533743983669-94fa5c4338ec?w=600&q=80" alt="Persian cat">
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Ivory</div>
+        <div class="pet-meta">Persian Cat · 5 yrs · Male</div>
+        <div class="pet-traits">
+          <span class="trait">Quiet</span>
+          <span class="trait">Affectionate</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-card observe" data-type="dog">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1558788353-f76d92427f16?w=600&q=80" alt="Beagle">
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Rusty</div>
+        <div class="pet-meta">Beagle · 1.5 yrs · Male</div>
+        <div class="pet-traits">
+          <span class="trait">Energetic</span>
+          <span class="trait">Curious</span>
+          <span class="trait">Loyal</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pet-card observe" data-type="other">
+      <div class="pet-img">
+        <img src="https://images.unsplash.com/photo-1425082661705-1834bfd09dca?w=600&q=80" alt="Rabbit">
+        <span class="pet-badge">New</span>
+      </div>
+      <div class="pet-info">
+        <div class="pet-name">Coco</div>
+        <div class="pet-meta">Holland Lop Rabbit · 1 yr · Female</div>
+        <div class="pet-traits">
+          <span class="trait">Gentle</span>
+          <span class="trait">Apartment-friendly</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-header observe">
+    <div>
+      <p class="section-label">The process</p>
+      <h2>Three simple steps<br>to a new friend</h2>
+    </div>
+  </div>
+  <div class="steps">
+    <div class="step observe">
+      <div class="step-num">01</div>
+      <h3>Browse & Connect</h3>
+      <p>Explore available pets by species, age, and temperament. Filter to find the companion that fits your lifestyle.</p>
+    </div>
+    <div class="step observe">
+      <div class="step-num">02</div>
+      <h3>Meet & Apply</h3>
+      <p>Schedule a visit at the shelter or request a virtual meet. Fill out a short adoption form online in minutes.</p>
+    </div>
+    <div class="step observe">
+      <div class="step-num">03</div>
+      <h3>Bring Them Home</h3>
+      <p>Once approved, take your new companion home. We provide a starter kit and 30-day post-adoption support.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonial-section" id="stories">
+  <div class="section-header observe">
+    <div>
+      <p class="section-label">Adoption stories</p>
+      <h2>Lives changed,<br>both ways</h2>
+    </div>
+  </div>
+  <div class="testimonials">
+    <div class="testi observe">
+      <p class="testi-quote">"Adopting Biscuit through Pawfound was seamless. The team genuinely cared about finding the right match — not just filling a form."</p>
+      <div class="testi-author">
+        <img class="testi-avatar" src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=80&q=80" alt="Priya">
+        <div>
+          <div class="testi-name">Priya M.</div>
+          <div class="testi-sub">Adopted a Golden Retriever, 2024</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi observe">
+      <p class="testi-quote">"I was nervous about adopting for the first time. Pawfound's team guided me every step of the way. Mochi is now my whole world."</p>
+      <div class="testi-author">
+        <img class="testi-avatar" src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&q=80" alt="Rahul">
+        <div>
+          <div class="testi-name">Rahul S.</div>
+          <div class="testi-sub">Adopted a Tabby Cat, 2025</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <p class="section-label">Ready?</p>
+  <h2>Find your <em style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--warm)">forever</em> friend today</h2>
+  <p>Hundreds of loving animals are waiting. It only takes a moment to change two lives.</p>
+  <div class="btn-group" style="justify-content:center">
+    <a href="#pets" class="btn-primary">Start Browsing</a>
+    <a href="mailto:hello@pawfound.com" class="btn-ghost">Contact Us</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Pawfound. All animals deserve love.</p>
+  <ul>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Shelters</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  // Intersection Observer for scroll reveals
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        const delay = e.target.dataset.delay || 0;
+        setTimeout(() => e.target.classList.add('visible'), delay);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.observe').forEach((el, i) => {
+    el.dataset.delay = (i % 3) * 100;
+    obs.observe(el);
+  });
+
+  // Filter tabs
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.pet-card');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const f = btn.dataset.filter;
+      cards.forEach(card => {
+        if (f === 'all' || card.dataset.type === f) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
