@@ -7,4 +7,4 @@ def homePage(request):
 
 
 def orderPage(request):
-    return render(request, 'order.html')
+    return render(request, 'orders.html')
