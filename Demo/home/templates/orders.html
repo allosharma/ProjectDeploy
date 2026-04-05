@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pawfound — Adoption Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #f7f3ee;
+    --bark: #2b1f14;
+    --warm: #c4875a;
+    --muted: #9a8a7a;
+    --line: rgba(43,31,20,0.12);
+    --success: #5aab5a;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--cream);
+    color: var(--bark);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.6rem 4rem;
+    background: var(--cream);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem; font-weight: 300;
+    letter-spacing: 0.08em; text-decoration: none; color: var(--bark);
+  }
+  .logo span { color: var(--warm); }
+
+  nav ul { display: flex; gap: 2.5rem; list-style: none; }
+  nav a {
+    text-decoration: none; color: var(--muted);
+    font-size: 0.82rem; letter-spacing: 0.12em;
+    text-transform: uppercase; transition: color 0.2s;
+  }
+  nav a:hover { color: var(--bark); }
+  .nav-cta {
+    background: var(--bark) !important; color: var(--cream) !important;
+    padding: 0.55rem 1.4rem; border-radius: 2px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    padding-top: 110px;
+    padding-bottom: 3rem;
+    padding-left: 4rem; padding-right: 4rem;
+    border-bottom: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: flex-end;
+    opacity: 0; transform: translateY(20px);
+    animation: rise 0.8s cubic-bezier(.22,1,.36,1) 0.15s forwards;
+  }
+
+  .eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.22em;
+    text-transform: uppercase; color: var(--warm); margin-bottom: 0.8rem;
+  }
+
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 300; line-height: 1.1;
+  }
+  h1 em { font-style: italic; color: var(--warm); }
+
+  .header-right { text-align: right; }
+  .pet-count-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    border: 1px solid var(--line); padding: 0.5rem 1rem;
+    border-radius: 2px; font-size: 0.8rem; color: var(--muted);
+  }
+  .dot-live {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--success);
+    animation: pulse 2s infinite;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .main-wrap {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 0;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel { padding: 3rem 4rem; border-right: 1px solid var(--line); }
+
+  /* Filters */
+  .filter-row {
+    display: flex; gap: 0.6rem; margin-bottom: 2.5rem; flex-wrap: wrap;
+    opacity: 0; animation: rise 0.7s ease 0.3s forwards;
+  }
+  .filter-btn {
+    background: none; border: 1px solid var(--line);
+    padding: 0.45rem 1.2rem; font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--muted);
+    border-radius: 2px; cursor: pointer; transition: all 0.2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--bark); color: var(--cream); border-color: var(--bark);
+  }
+
+  /* Pet Grid */
+  .pets-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem;
+  }
+
+  .pet-card {
+    border: 1px solid var(--line); border-radius: 3px;
+    overflow: hidden; cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.2s;
+    opacity: 0; transform: translateY(20px);
+    animation: rise 0.6s ease forwards;
+    position: relative;
+  }
+  .pet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(43,31,20,0.1);
+  }
+  .pet-card.selected {
+    border-color: var(--warm);
+    box-shadow: 0 0 0 2px var(--warm), 0 8px 28px rgba(196,135,90,0.15);
+  }
+
+  .pet-img { aspect-ratio: 4/3; overflow: hidden; position: relative; }
+  .pet-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    filter: sepia(6%) contrast(1.03);
+    transition: transform 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  .pet-card:hover .pet-img img { transform: scale(1.06); }
+
+  .pet-badge {
+    position: absolute; top: 0.8rem; left: 0.8rem;
+    background: var(--cream); color: var(--warm);
+    font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; padding: 0.25rem 0.65rem; border-radius: 2px;
+  }
+  .pet-badge.urgent { color: #b94a2c; }
+
+  /* Selected tick */
+  .sel-tick {
+    position: absolute; top: 0.8rem; right: 0.8rem;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(247,243,238,0.9); border: 1.5px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; opacity: 0.6;
+  }
+  .pet-card:hover .sel-tick { opacity: 1; }
+  .pet-card.selected .sel-tick { background: var(--warm); border-color: var(--warm); opacity: 1; }
+  .sel-tick svg { display: none; }
+  .pet-card.selected .sel-tick svg { display: block; }
+
+  .pet-info { padding: 1.1rem 1.2rem 1.3rem; background: #fff; }
+  .pet-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-weight: 400; margin-bottom: 0.25rem;
+  }
+  .pet-meta { font-size: 0.76rem; color: var(--muted); margin-bottom: 0.9rem; }
+  .pet-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem; }
+  .pet-traits { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .trait {
+    font-size: 0.66rem; letter-spacing: 0.06em; text-transform: uppercase;
+    border: 1px solid var(--line); padding: 0.18rem 0.55rem;
+    border-radius: 2px; color: var(--muted);
+  }
+  .pet-fee-wrap { text-align: right; flex-shrink: 0; }
+  .pet-fee {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem; font-weight: 400; color: var(--bark);
+    display: block; line-height: 1;
+  }
+  .fee-label { font-size: 0.68rem; color: var(--muted); letter-spacing: 0.05em; }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    padding: 3rem 2.5rem;
+    display: flex; flex-direction: column; gap: 2rem;
+    opacity: 0; animation: rise 0.7s ease 0.4s forwards;
+  }
+
+  .panel-section-label {
+    font-size: 0.68rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--warm); margin-bottom: 0.5rem;
+  }
+
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem; font-weight: 300; margin-bottom: 1.5rem;
+  }
+
+  /* Order list */
+  .order-box {
+    border: 1px solid var(--line); border-radius: 3px; overflow: hidden;
+  }
+  .order-box-header {
+    padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--line);
+    background: #fff;
+  }
+  .order-box-header h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; font-weight: 400;
+  }
+
+  .order-items-list { background: #fff; min-height: 70px; }
+
+  .empty-msg {
+    padding: 2rem 1.3rem; text-align: center;
+    color: var(--muted); font-size: 0.82rem; line-height: 1.8;
+  }
+  .empty-msg .paw-icon { font-size: 1.6rem; opacity: 0.3; margin-bottom: 0.4rem; }
+
+  .order-item {
+    display: flex; align-items: center; gap: 0.9rem;
+    padding: 0.85rem 1.3rem; border-bottom: 1px solid var(--line);
+  }
+  .order-item:last-child { border-bottom: none; }
+  .order-thumb {
+    width: 46px; height: 46px; border-radius: 2px;
+    object-fit: cover; flex-shrink: 0; filter: sepia(6%);
+  }
+  .order-info { flex: 1; }
+  .order-name { font-size: 0.88rem; font-weight: 400; }
+  .order-sub { font-size: 0.73rem; color: var(--muted); }
+  .order-fee { font-family: 'Cormorant Garamond', serif; font-size: 1rem; }
+  .order-remove {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 0.85rem; line-height: 1;
+    padding: 2px 5px; transition: color 0.2s; font-family: inherit;
+  }
+  .order-remove:hover { color: #b94a2c; }
+
+  .order-summary {
+    padding: 1rem 1.3rem; border-top: 1px solid var(--line); background: #faf7f4;
+  }
+  .sum-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; color: var(--muted); margin-bottom: 0.45rem;
+  }
+  .sum-total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 0.7rem; border-top: 1px solid var(--line); margin-top: 0.3rem;
+  }
+  .sum-total-label {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.05rem;
+  }
+  .sum-total-val {
+    font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--bark);
+  }
+
+  /* Payment Form */
+  .pay-box {
+    border: 1px solid var(--line); border-radius: 3px; overflow: hidden;
+  }
+  .pay-box-header {
+    padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--line); background: #fff;
+  }
+  .pay-box-header h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem; font-weight: 400;
+  }
+  .pay-body { padding: 1.5rem 1.3rem; background: #fff; }
+
+  .form-row { margin-bottom: 1rem; }
+  .form-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+
+  .form-label {
+    display: block; font-size: 0.7rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem;
+  }
+  .form-input {
+    width: 100%; border: 1px solid var(--line); border-radius: 2px;
+    padding: 0.62rem 0.9rem; font-size: 0.86rem;
+    font-family: 'DM Sans', sans-serif; font-weight: 300;
+    background: var(--cream); color: var(--bark);
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--warm); }
+  .form-input.valid { border-color: var(--success); }
+  .form-input.invalid { border-color: #c4563a; }
+
+  /* Card network logos */
+  .card-logos {
+    display: flex; gap: 0.4rem; margin-bottom: 0.9rem;
+  }
+  .card-logo {
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 0.2rem 0.55rem; font-size: 0.6rem;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    background: var(--cream);
+  }
+
+  .divider-or {
+    display: flex; align-items: center; gap: 0.8rem; margin: 1.1rem 0;
+  }
+  .divider-or::before, .divider-or::after {
+    content: ''; flex: 1; height: 1px; background: var(--line);
+  }
+  .divider-or span {
+    font-size: 0.68rem; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--muted);
+  }
+
+  .upi-row { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; margin-bottom: 1rem; }
+  .btn-verify {
+    background: var(--bark); color: var(--cream); border: none;
+    padding: 0 1rem; border-radius: 2px; cursor: pointer;
+    font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: 'DM Sans', sans-serif; white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .btn-verify:hover { background: var(--warm); }
+
+  .btn-pay {
+    width: 100%; background: var(--bark); color: var(--cream);
+    border: none; border-radius: 2px; padding: 0.95rem;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    letter-spacing: 0.14em; text-transform: uppercase; cursor: pointer;
+    transition: background 0.2s, transform 0.15s; margin-top: 0.4rem;
+  }
+  .btn-pay:hover:not(:disabled) { background: var(--warm); transform: translateY(-1px); }
+  .btn-pay:disabled { opacity: 0.38; cursor: not-allowed; }
+
+  .secure-line {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.45rem; margin-top: 0.8rem;
+    font-size: 0.7rem; color: var(--muted); letter-spacing: 0.04em;
+  }
+
+  /* ── SUCCESS SCREEN ── */
+  .success-screen {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--cream);
+    flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 2rem;
+  }
+  .success-screen.show { display: flex; }
+  .success-ring {
+    width: 72px; height: 72px; border-radius: 50%;
+    border: 2px solid var(--success); display: flex; align-items: center;
+    justify-content: center; margin: 0 auto 2rem;
+    animation: pop 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  .success-screen .eyebrow { margin-bottom: 1rem; }
+  .success-h {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 4vw, 3rem); font-weight: 300; margin-bottom: 1rem;
+  }
+  .success-sub {
+    font-size: 0.95rem; color: var(--muted);
+    max-width: 40ch; margin: 0 auto 2.5rem; line-height: 1.8;
+  }
+  .btn-back {
+    background: var(--bark); color: var(--cream); text-decoration: none;
+    padding: 0.85rem 2.2rem; font-size: 0.82rem;
+    letter-spacing: 0.1em; text-transform: uppercase; border-radius: 2px;
+    border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+    transition: background 0.2s;
+  }
+  .btn-back:hover { background: var(--warm); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 2.2rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  footer p { font-size: 0.78rem; color: var(--muted); }
+  footer ul { display: flex; gap: 2rem; list-style: none; }
+  footer a { font-size: 0.78rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  footer a:hover { color: var(--bark); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  @keyframes pop { from{transform:scale(0.6);opacity:0} to{transform:scale(1);opacity:1} }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 1024px) {
+    .pets-grid { grid-template-columns: repeat(2, 1fr); }
+    .main-wrap { grid-template-columns: 1fr 360px; }
+  }
+
+  @media (max-width: 860px) {
+    nav { padding: 1.2rem 2rem; }
+    nav ul { display: none; }
+    .main-wrap { grid-template-columns: 1fr; }
+    .left-panel { padding: 2.5rem 2rem; border-right: none; border-bottom: 1px solid var(--line); }
+    .right-panel { padding: 2.5rem 2rem; }
+    .page-header { padding: 100px 2rem 2rem; }
+    footer { padding: 2rem; flex-direction: column; gap: 1rem; }
+  }
+
+  @media (max-width: 560px) {
+    .pets-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="success-ring">
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+      <path d="M6 14l6 6L22 8" stroke="#5aab5a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <p class="eyebrow">Adoption confirmed</p>
+  <h2 class="success-h">You're almost a <em style="font-style:italic;color:var(--warm)">pet parent!</em></h2>
+  <p class="success-sub">Your application has been received. Our team will reach out within 24 hours to arrange a meet-and-greet at the shelter.</p>
+  <button class="btn-back" onclick="document.getElementById('successScreen').classList.remove('show')">Back to browsing</button>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Paw<span>found</span></a>
+  <ul>
+    <li><a href="#">Find a Pet</a></li>
+    <li><a href="#">How It Works</a></li>
+    <li><a href="#">Stories</a></li>
+    <li><a href="#" class="nav-cta">Adopt Now</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div>
+    <p class="eyebrow">Adoption centre</p>
+    <h1>Choose your <em>forever</em> companion</h1>
+  </div>
+  <div class="header-right">
+    <div class="pet-count-badge">
+      <span class="dot-live"></span>
+      <span id="countLabel">8 pets available</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+  <!-- LEFT: Pets -->
+  <div class="left-panel">
+    <div class="filter-row" id="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="dog">Dogs</button>
+      <button class="filter-btn" data-filter="cat">Cats</button>
+      <button class="filter-btn" data-filter="other">Others</button>
+    </div>
+    <div class="pets-grid" id="petsGrid"></div>
+  </div>
+
+  <!-- RIGHT: Order + Payment -->
+  <div class="right-panel">
+
+    <!-- Order Summary -->
+    <div>
+      <p class="panel-section-label">Your selection</p>
+      <div class="order-box">
+        <div class="order-box-header">
+          <p style="font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem">Adoption order</p>
+          <h3>Selected pets</h3>
+        </div>
+        <div class="order-items-list" id="orderList">
+          <div class="empty-msg" id="emptyMsg">
+            <div class="paw-icon">🐾</div>
+            <p>No pets selected.<br>Tap a card to add one.</p>
+          </div>
+        </div>
+        <div id="orderSummary" style="display:none">
+          <div class="order-summary">
+            <div class="sum-row"><span>Adoption fee(s)</span><span id="feeSum">₹0</span></div>
+            <div class="sum-row"><span>Processing charge</span><span>₹150</span></div>
+            <div class="sum-row"><span>Welcome starter kit</span><span>Free</span></div>
+            <div class="sum-total">
+              <span class="sum-total-label">Total payable</span>
+              <span class="sum-total-val" id="grandTotal">₹150</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div>
+      <p class="panel-section-label">Secure checkout</p>
+      <div class="pay-box">
+        <div class="pay-box-header">
+          <p style="font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.25rem">Payment details</p>
+          <h3>Complete your adoption</h3>
+        </div>
+        <div class="pay-body">
+
+          <div class="form-row">
+            <label class="form-label">Full name</label>
+            <input class="form-input" id="fName" type="text" placeholder="Aarav Sharma">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Email address</label>
+            <input class="form-input" id="fEmail" type="email" placeholder="you@email.com">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Phone number</label>
+            <input class="form-input" id="fPhone" type="tel" placeholder="+91 98765 43210">
+          </div>
+
+          <div style="margin-top:1.3rem">
+            <label class="form-label">Card details</label>
+            <div class="card-logos">
+              <span class="card-logo">Visa</span>
+              <span class="card-logo">Mastercard</span>
+              <span class="card-logo">Amex</span>
+              <span class="card-logo">RuPay</span>
+            </div>
+            <div class="form-row">
+              <input class="form-input" id="fCardNum" type="text" placeholder="1234  5678  9012  3456" maxlength="19">
+            </div>
+            <div class="form-2col">
+              <div>
+                <label class="form-label">Expiry</label>
+                <input class="form-input" id="fExpiry" type="text" placeholder="MM / YY" maxlength="7">
+              </div>
+              <div>
+                <label class="form-label">CVV</label>
+                <input class="form-input" id="fCvv" type="password" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <div class="divider-or"><span>or pay via UPI</span></div>
+
+          <div class="upi-row">
+            <input class="form-input" id="fUpi" type="text" placeholder="yourname@upi" style="margin:0">
+            <button class="btn-verify" onclick="verifyUpi()">Verify</button>
+          </div>
+
+          <button class="btn-pay" id="btnPay" disabled onclick="handlePay()">
+            Confirm Adoption
+          </button>
+
+          <div class="secure-line">
+            <svg width="10" height="12" viewBox="0 0 10 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0.75" y="4.75" width="8.5" height="6.5" rx="1.25" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M3 5V3.5a2 2 0 1 1 4 0V5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            256-bit SSL encrypted · Safe checkout
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Pawfound. All animals deserve love.</p>
+  <ul>
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Shelters</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  const PETS = [
+    { id:1, name:'Biscuit', breed:'Golden Retriever', age:'2 yrs', gender:'Male', type:'dog', badge:'New', fee:2500,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/YellowLabradorLooking_new.jpg/1200px-YellowLabradorLooking_new.jpg',
+      traits:['Playful','Kid-friendly','Trained'] },
+    { id:2, name:'Mochi', breed:'Tabby Cat', age:'3 yrs', gender:'Female', type:'cat', badge:null, fee:1200,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Cat_August_2010-4.jpg/1200px-Cat_August_2010-4.jpg',
+      traits:['Calm','Indoor','Gentle'] },
+    { id:3, name:'Pepper', breed:'Miniature Poodle', age:'4 yrs', gender:'Female', type:'dog', badge:'Urgent', fee:2000,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Cairn-Terrier-Argyll.jpg/1200px-Cairn-Terrier-Argyll.jpg',
+      traits:['Hypoallergenic','Smart'] },
+    { id:4, name:'Ivory', breed:'Persian Cat', age:'5 yrs', gender:'Male', type:'cat', badge:null, fee:1800,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg',
+      traits:['Quiet','Affectionate'] },
+    { id:5, name:'Rusty', breed:'Beagle', age:'1.5 yrs', gender:'Male', type:'dog', badge:null, fee:1500,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Beagle_600.jpg/1200px-Beagle_600.jpg',
+      traits:['Energetic','Curious','Loyal'] },
+    { id:6, name:'Coco', breed:'Holland Lop Rabbit', age:'1 yr', gender:'Female', type:'other', badge:'New', fee:800,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Oryctolagus_cuniculus_Rcdo.jpg/1200px-Oryctolagus_cuniculus_Rcdo.jpg',
+      traits:['Gentle','Apartment-friendly'] },
+    { id:7, name:'Bruno', breed:'German Shepherd', age:'3 yrs', gender:'Male', type:'dog', badge:null, fee:2800,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/German_Shepherd_-_DSC_0346_%2810096362833%29.jpg/1200px-German_Shepherd_-_DSC_0346_%2810096362833%29.jpg',
+      traits:['Protective','Intelligent','Active'] },
+    { id:8, name:'Luna', breed:'Siamese Cat', age:'2 yrs', gender:'Female', type:'cat', badge:'New', fee:1600,
+      img:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Siam_lilacpoint.jpg/1200px-Siam_lilacpoint.jpg',
+      traits:['Social','Vocal','Elegant'] },
+  ];
+
+  let selected = new Set();
+  let activeFilter = 'all';
+
+  function fmt(n){ return '₹' + n.toLocaleString('en-IN'); }
+
+  function renderGrid(){
+    const grid = document.getElementById('petsGrid');
+    const filtered = activeFilter === 'all' ? PETS : PETS.filter(p => p.type === activeFilter);
+    document.getElementById('countLabel').textContent = filtered.length + ' pets available';
+    grid.innerHTML = filtered.map((p, i) => `
+      <div class="pet-card ${selected.has(p.id)?'selected':''}" 
+           style="animation-delay:${i*0.07}s"
+           onclick="togglePet(${p.id})">
+        <div class="pet-img">
+          <img src="${p.img}" alt="${p.name}" loading="lazy">
+          ${p.badge ? `<span class="pet-badge ${p.badge==='Urgent'?'urgent':''}">${p.badge}</span>` : ''}
+          <div class="sel-tick">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="pet-info">
+          <div class="pet-name">${p.name}</div>
+          <div class="pet-meta">${p.breed} · ${p.age} · ${p.gender}</div>
+          <div class="pet-row">
+            <div class="pet-traits">${p.traits.map(t=>`<span class="trait">${t}</span>`).join('')}</div>
+            <div class="pet-fee-wrap">
+              <span class="pet-fee">${fmt(p.fee)}</span>
+              <span class="fee-label">adoption fee</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderOrder(){
+    const list = document.getElementById('orderList');
+    const empty = document.getElementById('emptyMsg');
+    const summary = document.getElementById('orderSummary');
+    const sel = PETS.filter(p => selected.has(p.id));
+
+    document.getElementById('btnPay').disabled = sel.length === 0;
+
+    if(sel.length === 0){
+      list.innerHTML = '';
+      list.appendChild(empty);
+      empty.style.display = '';
+      summary.style.display = 'none';
+      return;
+    }
+
+    empty.style.display = 'none';
+    summary.style.display = '';
+
+    const fee = sel.reduce((a,p)=>a+p.fee,0);
+    document.getElementById('feeSum').textContent = fmt(fee);
+    document.getElementById('grandTotal').textContent = fmt(fee + 150);
+
+    list.innerHTML = sel.map(p => `
+      <div class="order-item">
+        <img class="order-thumb" src="${p.img}" alt="${p.name}">
+        <div class="order-info">
+          <div class="order-name">${p.name}</div>
+          <div class="order-sub">${p.breed}</div>
+        </div>
+        <span class="order-fee">${fmt(p.fee)}</span>
+        <button class="order-remove" onclick="removePet(event,${p.id})" title="Remove">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function togglePet(id){
+    selected.has(id) ? selected.delete(id) : selected.add(id);
+    renderGrid(); renderOrder();
+  }
+
+  function removePet(e, id){
+    e.stopPropagation();
+    selected.delete(id);
+    renderGrid(); renderOrder();
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      renderGrid();
+    });
+  });
+
+  // Card number formatting
+  document.getElementById('fCardNum').addEventListener('input', function(){
+    let v = this.value.replace(/\D/g,'').slice(0,16);
+    this.value = v.replace(/(.{4})/g,'$1  ').trim();
+  });
+
+  // Expiry formatting
+  document.getElementById('fExpiry').addEventListener('input', function(){
+    let v = this.value.replace(/\D/g,'').slice(0,4);
+    if(v.length>=3) v = v.slice(0,2) + ' / ' + v.slice(2);
+    this.value = v;
+  });
+
+  function verifyUpi(){
+    const inp = document.getElementById('fUpi');
+    if(inp.value.includes('@') && inp.value.length > 3){
+      inp.classList.add('valid'); inp.classList.remove('invalid');
+    } else {
+      inp.classList.add('invalid'); inp.classList.remove('valid');
+    }
+  }
+
+  function handlePay(){
+    const name = document.getElementById('fName').value.trim();
+    const email = document.getElementById('fEmail').value.trim();
+    if(!name || !email){ return; }
+    document.getElementById('successScreen').classList.add('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  renderGrid();
+  renderOrder();
+</script>
+
+</body>
+</html>
