@@ -4,3 +4,7 @@ from django.shortcuts import render
 
 def homePage(request):
     return render(request, 'index.html')
+
+
+def orderPage(request):
+    return render(request, 'order.html')
